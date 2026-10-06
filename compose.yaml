@@ -6,6 +6,7 @@ services:
       - "127.0.0.1:8085:8085"
     environment:
       JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+      JENKINS_OPTS: "--httpPort=8085"
       JENKINS_ADMIN_USER: "${JENKINS_ADMIN_USER:-admin}"
       REPO_URL: "${REPO_URL:?Укажите SSH URL репозитория в .env}"
       DELETE_FILES: "${DELETE_FILES:?Укажите один или два файла в .env}"

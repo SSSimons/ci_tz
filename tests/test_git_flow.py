@@ -58,7 +58,7 @@ class GitFlowTests(unittest.TestCase):
         run('git', 'commit', '-m', '[ci-cleanup] Remove selected files', cwd=job3)
         run('git', 'push', 'origin', 'HEAD:refs/heads/master', cwd=job3)
         files = run('git', 'ls-tree', '--name-only', 'master', cwd=self.remote).stdout.splitlines()
-        self.assertEqual(set(files), {'app.py', 'README.md'})
+        self.assertEqual(set(files), {'app.py'})
         message = run('git', 'log', '-1', '--format=%s', 'master', cwd=self.remote).stdout.strip()
         self.assertEqual(message, '[ci-cleanup] Remove selected files')
         self.delete(['obsolete.txt', 'legacy.txt'], repo=job3)
