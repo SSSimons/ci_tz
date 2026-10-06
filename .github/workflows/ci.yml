@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Tests and configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Check shell syntax
+        run: bash -n deploy.sh bootstrap.sh
+
+      - name: Check Python syntax
+        run: python -m compileall -q scripts tests
+
+      - name: Test Git operations
+        run: python -m unittest discover -s tests -v
+
+      - name: Validate Compose configuration
+        env:
+          REPO_URL: git@github.com:ci-placeholder/ci_tz.git
+          DELETE_FILES: '["demo/obsolete.txt", "demo/legacy.txt"]'
+        run: docker compose config --quiet
+
+  build:
+    name: Build Jenkins image
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build Docker image
+        run: docker build --tag jenkins-ci-lab:ci .
