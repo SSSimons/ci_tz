@@ -31,13 +31,15 @@ ssh-keyscan -H github.com > secrets/known_hosts
 ssh-keygen -lf secrets/known_hosts
 ```
 
+Сверь отпечатки с [документацией GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints).
+
 ## 📝 Настройки
 
 Заполни `.env`. Пример для репозитория `ci_tz`, в котором находится весь этот комплект:
 
 ```dotenv
 REPO_URL=git@github.com:YOUR_USER/ci_tz.git
-DELETE_FILES='["demo/first.txt", "demo/second.txt"]'
+DELETE_FILES='["demo/obsolete.txt", "demo/legacy.txt"]'
 JENKINS_ADMIN_USER=admin
 GIT_AUTHOR_NAME=Sim
 GIT_AUTHOR_EMAIL=ci@tz.com
@@ -60,7 +62,7 @@ Jenkins: **http://127.0.0.1:8085**. Логин — `admin`, пароль — и�
 ssh -N -L 8085:127.0.0.1:8085 USER@SERVER
 ```
 
-Зайди обратно на сервер Jenkins и будет оторбажено, что три job создаются автоматически.
+Затем зайди на **http://localhost:8085**. Три job создаются автоматически.
 
 ## ✅ Проверка задания
 
@@ -80,3 +82,11 @@ python3 -m unittest discover -s tests -v
 ```
 
 Тесты проверяют операции Git; для проверки самих job нужен работающий Jenkins. Настройки и история хранятся в volume `jenkins_home`. Остановка с сохранением данных: `sudo docker compose down`.
+
+## 🤖 GitHub Actions
+
+Файл `.github/workflows/ci.yml` запускает CI при push в `master` и pull request в эту ветку. После отправки файлов результат появится во вкладке **Actions → CI**.
+
+Проверки: синтаксис Bash и Python, тесты Git, конфигурация Compose и сборка образа Jenkins. Сборка запускается после успешных проверок. Secrets для этого workflow не нужны.
+
+Тестовые файлы создаются во временном репозитории, поэтому CI работает и после удаления файлов Job_2. Actions проверяет код и собирает образ; развёртывание и цепочка из трёх job выполняются отдельно в Jenkins.

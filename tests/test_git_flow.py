@@ -1,9 +1,7 @@
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
-import tarfile
 import tempfile
 import unittest
 
@@ -32,8 +30,14 @@ class GitFlowTests(unittest.TestCase):
         run('git', 'init', '--bare', '-b', 'master', str(self.remote), cwd=self.base)
         run('git', 'clone', str(self.remote), str(self.repo), cwd=self.base)
         self.configure(self.repo)
-        for source in (ROOT / 'demo').iterdir():
-            shutil.copy(source, self.repo / source.name)
+        # Файлы создаются заново в каждом тесте: CI работает и после удаления demo-файлов Jenkins.
+        fixtures = {
+            'app.py': 'print("CI/CD test project")\n',
+            'obsolete.txt': 'Obsolete test file\n',
+            'legacy.txt': 'Legacy test file\n',
+        }
+        for name, content in fixtures.items():
+            (self.repo / name).write_text(content)
         run('git', 'add', '.', cwd=self.repo)
         run('git', 'commit', '-m', 'Initial demo', cwd=self.repo)
         run('git', 'push', '-u', 'origin', 'master', cwd=self.repo)
