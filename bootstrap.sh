@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo pipefail
 for file in admin_password git_key known_hosts; do
   if [[ ! -s "/run/ci-secrets/$file" ]]; then
